@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://unpkg.com/vue"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"></script>  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="normalize.css">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
+<div class="container">
+
   <div id="dissonance">
 
-    <h1>Dissonance: Calculate Consonant Music Intervals Using a Sound's Spectrum</h1>
+    <div id="tangledsine" align="center"></div>
+
+    <div id="title">
+      <h1>Dissonance</h1>
+      <h3>Calculate Consonant Musical Intervals Using a Sound's Spectrum</h3>
+    </div>
 
     <h2>Frequency and Amplitude Of Your Sound</h2>
-    <p>This is the input to the app. Try editing the code below.</p>
-    <textarea v-model="arrayCode" class="codeInput">
-    </textarea>
+    <p>Try editing the code below and press Run.</p>
+
+    <div class="code-editor">
+      <textarea v-model="arrayCode" class="codeInput">
+      </textarea>
+      <button @click="makeGraphs">Run</button>
+    </div>
 
     <h2>Dissonance for 2 Notes</h2>
     <p>Hover over dips to find consonant musical intervals</p>
@@ -28,9 +39,16 @@
     <p>The valleys correspond to consonant musical triads. Drag to rotate.</p>
     <div id="graph-3d-hills" class="graph3d"></div>
 
+    <h2>References</h2>
+    <p>The algorithm used in this article is outlined in the book <a href ="http://sethares.engr.wisc.edu/ttss.html">Tuning, Timbre, Spectrum, Scale</a> by William A. Sethares. I pulled values of parameters from this <a href="https://gist.github.com/endolith/3066664">Python port</a> of Sethares' work. The code for this page is available on <a href="https://github.com/aatishb/dissonance">Github</a>.</p>
+
   </div>
+</div>
 
   <script src="dissonance.js"></script>
-
+  <script type="text/javascript" src="tangledsine.js"></script>
+  <script type="text/javascript"> new p5(tangledsine, "tangledsine"); </script>
+  <script type="text/javascript">javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;left:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+  </script>
 </body>
 </html>

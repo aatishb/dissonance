@@ -1,5 +1,6 @@
 (function() {
 
+
 let refFreq, maxInterval = 2.3;
 let freqArray, ampArray;
 
@@ -29,6 +30,7 @@ function dissonance(f1, f2, l1, l2) {
 
   return l12 * (Math.exp(-b1*p) - Math.exp(-b2*p));
 }
+
 
 function make2DGraph(code) {
 
@@ -144,7 +146,7 @@ function make3DGraph(code) {
       x: xArr,
       y: yArr,
       z: zArr,
-      opacity:0.8,
+      opacity:0.9,
       type: 'mesh3d'
     }]
 
@@ -168,17 +170,17 @@ maxInterval = 2.3; // rightmost limit of 2d dissonance graph (octave = 2.0)
 `
   },
 
-  watch: {
-   arrayCode: function() {
-     make2DGraph(this.arrayCode);
-     make3DGraph(this.arrayCode);
-   }
+  methods: {
+
+    makeGraphs: function() {
+      make2DGraph(this.arrayCode);
+      make3DGraph(this.arrayCode);
+    }
   },
 
   mounted: function() {
-    make2DGraph(this.arrayCode);
-    make3DGraph(this.arrayCode);
-  }
+      this.makeGraphs();
+    }
 })
 
 })();

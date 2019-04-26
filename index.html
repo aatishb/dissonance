@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+  <div id="dissonance">
+
+    <div id="sliderdiv">
+      <p>{{message}} {{ numPartials }}</p>
+      <input type="range" min="1" max="10" step="1" v-model="numPartials">
+      </input>
+    </div>
+
+    <div id="graph-2d" class="graph2d"></div>
+
+    <div id="graph-3d" class="graph3d"></div>
+
+  </div>
+
+  <script src="dissonance.js"></script>
+
+</body>
+</html>

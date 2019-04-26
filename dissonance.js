@@ -1,12 +1,7 @@
 (function() {
 
-let refFreq = 400;
-let maxInterval = 2.3;
-
-let freqArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-let ampArray = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-
-let loudnessArray = ampArray.map(ampToLoudness);
+let refFreq, maxInterval = 2.3;
+let freqArray, ampArray;
 
 function ampToLoudness(amp) {
   // first convert amplitude to dB
@@ -35,7 +30,11 @@ function dissonance(f1, f2, l1, l2) {
   return l12 * (Math.exp(-b1*p) - Math.exp(-b2*p));
 }
 
-function make2DGraph(numPartials) {
+function make2DGraph(code) {
+
+  eval(code);
+  let numPartials = freqArray.length;
+  let loudnessArray = ampArray.map(ampToLoudness);
 
   let xArr = [];
   let yArr = [];
@@ -89,14 +88,18 @@ function make2DGraph(numPartials) {
 }
 
 
-function make3DGraph(numPartials) {
+function make3DGraph(code) {
 
   let xArr = [];
   let yArr = [];
   let zArr = [];
 
-  for (let r = 1; r < 2; r += 0.001) {
-    for (let s = 1; s < 2; s += 0.001) {
+  eval(code);
+  let numPartials = freqArray.length;
+  let loudnessArray = ampArray.map(ampToLoudness);
+
+  for (let r = 1; r < 2; r += 0.01) {
+    for (let s = 1; s < 2; s += 0.01) {
       xArr.push(r);
       yArr.push(s);
       let dissonanceScore = 0;
@@ -125,7 +128,7 @@ function make3DGraph(numPartials) {
   let normalizedzArr = zArr.map(e => e/maxDissonance);
 
 
-  Plotly.newPlot(document.getElementById('graph-3d'),
+  Plotly.newPlot(document.getElementById('graph-3d-contour'),
     [{
       x: xArr,
       y: yArr,
@@ -136,6 +139,19 @@ function make3DGraph(numPartials) {
 
   );
 
+  Plotly.newPlot(document.getElementById('graph-3d-hills'),
+    [{
+      x: xArr,
+      y: yArr,
+      z: zArr,
+      opacity:0.8,
+      color:'rgb(300,100,200)',
+      type: 'mesh3d',
+    }]
+
+  );
+
+
 }
 
 
@@ -145,20 +161,24 @@ new Vue({
   el: '#dissonance',
 
   data: {
-    message: 'Number of partials: ',
-    numPartials: 1
+    arrayCode: `freqArray = [1, 2, 3, 4, 5]; // frequency of partials in multiples of the fundamental
+ampArray = [1, 1, 1, 1, 1]; // amplitudes for each partial
+
+refFreq = 400; // fundamental frequency, i.e. frequency of lowest partial (in Hz)
+maxInterval = 2.3; // rightmost limit of 2d dissonance graph (octave = 2.0)
+`
   },
 
   watch: {
-    numPartials: function() {
-      make2DGraph(this.numPartials);
-      make3DGraph(this.numPartials);
-    }
+   arrayCode: function() {
+     make2DGraph(this.arrayCode);
+     make3DGraph(this.arrayCode);
+   }
   },
 
   mounted: function() {
-    make2DGraph(this.numPartials);
-    make3DGraph(this.numPartials);
+    make2DGraph(this.arrayCode);
+    make3DGraph(this.arrayCode);
   }
 })
 

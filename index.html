@@ -9,15 +9,24 @@
 
   <div id="dissonance">
 
-    <div id="sliderdiv">
-      <p>{{message}} {{ numPartials }}</p>
-      <input type="range" min="1" max="10" step="1" v-model="numPartials">
-      </input>
-    </div>
+    <h1>Dissonance: Find consonant music intervals using the spectrum of a sound</h1>
 
+    <h2>Frequency and amplitude arrays</h2>
+    <p>This is the input to the app. Try editing the arrays or values below. (Tip: make sure that both arrays are the same length.)</p>
+    <textarea v-model="arrayCode" class="codeInput">
+    </textarea>
+
+    <h2>Plot of Dissonance for two notes played together</h2>
+    <p>Hover over dips to find consonant musical intervals</p>
     <div id="graph-2d" class="graph2d"></div>
 
-    <div id="graph-3d" class="graph3d"></div>
+    <h2>Surface Plot of Dissonance for 3 note triad</h2>
+    <p>The valleys correspond to consonant musical triads. Drag to rotate.</p>
+    <div id="graph-3d-hills" class="graph3d"></div>
+
+    <h2>Contour Plot of Dissonance for 3 note triad</h2>
+    <p>Hover over dark blue areas to find consonant musical triads</p>
+    <div id="graph-3d-contour" class="graph3d"></div>
 
   </div>
 

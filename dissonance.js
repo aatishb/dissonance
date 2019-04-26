@@ -145,8 +145,7 @@ function make3DGraph(code) {
       y: yArr,
       z: zArr,
       opacity:0.8,
-      color:'rgb(300,100,200)',
-      type: 'mesh3d',
+      type: 'mesh3d'
     }]
 
   );
@@ -162,7 +161,7 @@ new Vue({
 
   data: {
     arrayCode: `freqArray = [1, 2, 3, 4, 5]; // frequency of partials in multiples of the fundamental
-ampArray = [1, 1, 1, 1, 1]; // amplitudes for each partial
+ampArray = [1, 1, 1, 1, 1]; // amplitude of partials (should match length of freqArray)
 
 refFreq = 400; // fundamental frequency, i.e. frequency of lowest partial (in Hz)
 maxInterval = 2.3; // rightmost limit of 2d dissonance graph (octave = 2.0)

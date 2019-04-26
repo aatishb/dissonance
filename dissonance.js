@@ -101,7 +101,7 @@ function make3DGraph(code) {
   let loudnessArray = ampArray.map(ampToLoudness);
 
   for (let r = 1; r < 2; r += 0.01) {
-    for (let s = 1; s < 2; s += 0.01) {
+    for (let s = 1; s <= r; s += 0.01) {
       xArr.push(r);
       yArr.push(s);
       let dissonanceScore = 0;
@@ -122,6 +122,16 @@ function make3DGraph(code) {
       dissonanceScore /= 2;
 
       zArr.push(dissonanceScore);
+
+      // factor of 2 time savings!
+      // since the function is symmetrical around the main diagonal
+      // we can do this
+      if (s !== r){
+        xArr.push(s);
+        yArr.push(r);
+        zArr.push(dissonanceScore);
+      }
+
     }
   }
 
@@ -130,23 +140,23 @@ function make3DGraph(code) {
   let normalizedzArr = zArr.map(e => e/maxDissonance);
 
 
-  Plotly.newPlot(document.getElementById('graph-3d-contour'),
+  Plotly.newPlot(document.getElementById('graph-3d-heatmap'),
     [{
       x: xArr,
       y: yArr,
-      z: zArr,
-      type: 'contour',
-      colorscale: 'Jet',
+      z: normalizedzArr,
+      type: 'heatmap',
+      colorscale: 'Viridis'
     }]
 
   );
+
 
   Plotly.newPlot(document.getElementById('graph-3d-hills'),
     [{
       x: xArr,
       y: yArr,
-      z: zArr,
-      opacity:0.9,
+      z: normalizedzArr,
       type: 'mesh3d'
     }]
 

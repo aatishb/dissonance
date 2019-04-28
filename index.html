@@ -36,15 +36,17 @@
     <table>
 
       <tr>
-        <th>Interval</th>
+        <th>Interval Ratio</th>
+        <th>Interval Name</th>
         <th>Midi Note</th>
-        <th>Closest Piano Note</th>
+        <!--<th>Closest Piano Note</th>-->
       </tr>
 
       <tr v-for="interval in consonantIntervals">
         <td>{{myRound(interval.x)}}</td>
+        <td>{{interval.interval}}</td>
         <td>{{myRound(interval.midi)}}</td>
-        <td>{{interval.note}}</td>
+        <!--<td>{{interval.note}}</td>-->
       </tr>
     </table>
 

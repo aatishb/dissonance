@@ -4,6 +4,22 @@ function myRound(n) {
 
 let notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+let intervalLabels = [
+  'unison',
+  'minor second',
+  'major second',
+  'minor third',
+  'major third',
+  'perfect fourth',
+  'dimished fifth',
+  'perfect fifth',
+  'minor sixth',
+  'major sixth',
+  'minor seventh',
+  'major seventh',
+  'octave'
+];
+
 function getIntervals(peaks) {
   let intervals = [];
 
@@ -15,7 +31,8 @@ function getIntervals(peaks) {
       x: x,
       y: peak.y,
       midi: m,
-      note: midiToNote(m)
+      note: midiToNote(m),
+      interval: intervalLabels[Math.round(m) - 60]
     })
   }
 

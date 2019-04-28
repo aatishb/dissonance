@@ -1,8 +1,8 @@
 let defaultCode = `freqArray = [1, 2, 3, 4, 5, 6]; // frequency of partials (in multiples of fundamental)
-ampArray = [1, 1, 1, 1, 1, 1]; // amplitude of partials (should match length of freqArray)
+ampArray = [1, 1, 1, 1, 1, 1]; // amplitude of partials (should match freqArray's length)
 
-refFreq = 261.6256; // fundamental, i.e. frequency of lowest partial (in Hz)
-maxInterval = 2.2; // dissonance graph stops at this value (octave = 2.0)
+refFreq = 261.6256; // fundamental frequency (in Hz)
+maxInterval = 2.2; // dissonance graph ends at this value (octave = 2.0)
 slopeCutoff = 1; // higher = fewer minima, 0 = all minima
 `;
 
@@ -91,12 +91,14 @@ function make2DGraph([xArr, yArr], intervals) {
 
   let trace1 = {
       x: xArr,
-      y: yArr
+      y: yArr,
+      name: 'dissonance'
     };
 
   let trace2 = {
     x: intervals.map(e => e.x),
     y: intervals.map(e => e.y),
+    name: 'minima',
     mode: 'markers',
     marker: { size: 12, opacity: 0.5 }
   }

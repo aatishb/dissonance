@@ -11,7 +11,7 @@ let intervalLabels = [
   'minor third',
   'major third',
   'perfect fourth',
-  'dimished fifth',
+  'dimished fifth / tritone',
   'perfect fifth',
   'minor sixth',
   'major sixth',
@@ -85,8 +85,8 @@ function getPeaks(data2d)
 
   //let slopeCutoff = 0;   // more negative = fewer peaks
   let peaks = [{
-    x: 1,
-    y: 0
+    x: xArr[0],
+    y: yArr[0]
   }];
 
   for (i = 1; i<yArr.length; i++)
@@ -134,9 +134,9 @@ function findSlope(array,index){
 }
 
 function smoothSlope(array,index){
-  //return findSlope(array,index);
+  return findSlope(array,index);
   //return (findSlope(array,index-1)+findSlope(array,index)+findSlope(array,index+1))/3;
-  return (findSlope(array,index-2)+2*findSlope(array,index-1)+3*findSlope(array,index)+2*findSlope(array,index+1)+findSlope(array,index+2))/9;
+  //return (findSlope(array,index-2)+2*findSlope(array,index-1)+3*findSlope(array,index)+2*findSlope(array,index+1)+findSlope(array,index+2))/9;
   //return (findSlope(array,index-3)+3*findSlope(array,index-2)+6*findSlope(array,index-1)+7*findSlope(array,index)+6*findSlope(array,index+1)+3*findSlope(array,index+3)+findSlope(array,index+3))/27;
 }
 

@@ -1,3 +1,11 @@
+let defaultCode = `freqArray = [1, 2, 3, 4, 5, 6]; // frequency of partials (in multiples of fundamental)
+ampArray = [1, 1, 1, 1, 1, 1]; // amplitude of partials (should match length of freqArray)
+
+refFreq = 261.6256; // fundamental, i.e. frequency of lowest partial (in Hz)
+maxInterval = 2.2; // dissonance graph stops at this value (octave = 2.0)
+slopeCutoff = 1; // higher = fewer minima, 0 = all minima
+`;
+
 let refFreq, maxInterval = 2.3;
 let slopeCutoff = 0;
 let freqArray, ampArray;
@@ -90,7 +98,7 @@ function make2DGraph([xArr, yArr], intervals) {
     x: intervals.map(e => e.x),
     y: intervals.map(e => e.y),
     mode: 'markers',
-    marker: { size: 12 }
+    marker: { size: 12, opacity: 0.5 }
   }
 
   Plotly.newPlot(document.getElementById('graph-2d'),
@@ -151,13 +159,7 @@ let app = new Vue({
   el: '#dissonance',
 
   data: {
-    code: `freqArray = [1, 2, 3, 4, 5]; // frequency of partials in multiples of the fundamental
-ampArray = [1, 1, 1, 1, 1]; // amplitude of partials (should match length of freqArray)
-
-refFreq = 261.6256; // fundamental frequency, i.e. frequency of lowest partial (in Hz)
-maxInterval = 2.2; // rightmost limit of 2d dissonance graph (octave = 2.0)
-slopeCutoff = 1; // higher values will select fewer minima
-`,
+    code: defaultCode,
     consonantIntervals: []
   },
 

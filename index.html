@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"></script>  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <link rel="stylesheet" type="text/css" href="normalize.css">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
@@ -22,7 +24,7 @@
     <p>Try editing the code below and press Run.</p>
 
     <div class="code-editor">
-      <textarea v-model="arrayCode" class="codeInput">
+      <textarea v-model="code" class="codeInput">
       </textarea>
       <button @click="makeGraphs">Run</button>
     </div>
@@ -30,6 +32,21 @@
     <h2>Dissonance for 2 Note Intervals</h2>
     <p>Hover over dips to find consonant musical intervals</p>
     <div id="graph-2d" class="graph2d"></div>
+
+    <table>
+
+      <tr>
+        <th>Interval</th>
+        <th>Midi Note</th>
+        <th>Closest Piano Note</th>
+      </tr>
+
+      <tr v-for="interval in consonantIntervals">
+        <td>{{myRound(interval.x)}}</td>
+        <td>{{myRound(interval.midi)}}</td>
+        <td>{{interval.note}}</td>
+      </tr>
+    </table>
 
     <h2>Dissonance for 3 Note Triad (Heatmap)</h2>
     <p>Hover over dark blue areas to find consonant musical triads</p>
@@ -45,10 +62,17 @@
   </div>
 </div>
 
-  <script src="dissonance.js"></script>
+  <!-- page code -->
+  <script src="helper.js"></script>
+  <script src="main.js"></script>
+
+  <!-- p5 header -->
   <script type="text/javascript" src="tangledsine.js"></script>
   <script type="text/javascript"> new p5(tangledsine, "tangledsine"); </script>
+
+
   <script type="text/javascript">javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;left:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
   </script>
+
 </body>
 </html>

@@ -1,3 +1,194 @@
+let refFreq, maxInterval = 2.3;
+let slopeCutoff = 0;
+let freqArray, ampArray;
+
+function getData2d(code) {
+  eval(code);
+
+  let numPartials = freqArray.length;
+  let loudnessArray = ampArray.map(ampToLoudness);
+
+  let xArr = [];
+  let yArr = [];
+
+  for (let c = 1; c < maxInterval; c += 0.001) {
+    xArr.push(c);
+    let dissonanceScore = 0;
+
+    for (let i = 0; i < numPartials; i++){
+      for (let j = 0; j < numPartials; j++) {
+        let f1 = refFreq * freqArray[i];
+        let f2 = refFreq * freqArray[j];
+        let l1 = loudnessArray[i];
+        let l2 = loudnessArray[j];
+        dissonanceScore += 0.5*dissonance(f1,f2,l1,l2) + 0.5*dissonance(c*f1,c*f2,l1,l2) + dissonance(f1,c*f2,l1,l2);
+      }
+    }
+    dissonanceScore /= 2;
+    yArr.push(dissonanceScore);
+  }
+
+  let maxDissonance = yArr.reduce((a,b) => a > b ? a : b);
+  let normalizedyArr = yArr.map(e => e / maxDissonance);
+
+  return [xArr, normalizedyArr];
+}
+
+
+function getData3d() {
+  let xArr = [];
+  let yArr = [];
+  let zArr = [];
+
+  eval(this.code);
+  let numPartials = freqArray.length;
+  let loudnessArray = ampArray.map(ampToLoudness);
+
+  let maxZ = 0;
+  let dataArray = [];
+
+  for (let r = 1; r <= 2; r += 0.01) {
+
+    let dataArraySlice = [];
+
+    for (let s = 1; s <= 2; s += 0.01) {
+
+      let dissonanceScore = 0;
+
+      for (let i = 0; i < numPartials; i++){
+        for (let j = 0; j < numPartials; j++) {
+            let f1 = refFreq * freqArray[i];
+            let f2 = refFreq * freqArray[j];
+            let l1 = loudnessArray[i];
+            let l2 = loudnessArray[j];
+            let d = dissonance(f1,f2,l1,l2) + dissonance(r*f1,r*f2,l1,l2) + dissonance(f1,r*f2,l1,l2)
+              + dissonance(s*f1,s*f2,l1,l2) + dissonance(f1,s*f2,l1,l2) + dissonance(r*f1,s*f2,l1,l2)
+
+            dissonanceScore += d;
+        }
+      }
+
+      dissonanceScore /= 2;
+      dataArraySlice.push(dissonanceScore);
+
+      if (dissonanceScore > maxZ) {
+        maxZ = dissonanceScore;
+      }
+
+    }
+    dataArray.push(dataArraySlice);
+  }
+
+  let xData = [];
+  let yData = [];
+
+  for (let r = 1; r < 2; r += 0.01) {
+    xData.push(r);
+    yData.push(r);
+  }
+
+  let zData = dataArray.map(e => e.map(e => e/maxZ))
+
+  return [xData, yData, zData];
+}
+
+
+function make2DGraph([xArr, yArr], intervals) {
+
+  let trace1 = {
+      x: xArr,
+      y: yArr,
+      name: 'dissonance'
+    };
+
+  let trace2 = {
+    x: intervals.map(e => e.x),
+    y: intervals.map(e => e.y),
+    name: 'minima',
+    mode: 'markers',
+    marker: { size: 12, opacity: 0.5 }
+  }
+
+  Plotly.newPlot(document.getElementById('graph-2d'),
+    [trace1, trace2],
+    {
+
+      margin: { t: 0 },
+      xaxis: {
+        title: {
+          text: 'interval (frequency ratio)'
+        },
+      },
+      yaxis: {
+        title: {
+          text: 'Normalized Spectral Dissonance'
+        }
+      }
+
+    }
+  );
+
+}
+
+
+function make3DGraph([xData, yData, zData], peaks) {
+
+  let trace1 = {
+      x: xData,
+      y: yData,
+      z: zData,
+      type: 'heatmap',
+      colorscale: 'Viridis'
+    };
+
+
+  let trace2 = {
+    /*
+    x: peaks.map(e => e.x),
+    y: peaks.map(e => e.y),
+    name: 'minima',
+    mode: 'markers',
+    marker: { size: 12, opacity: 0.5 }
+    */
+  }
+
+
+  Plotly.newPlot(document.getElementById('graph-3d-heatmap'),
+     [trace1, trace2]
+  );
+
+
+  Plotly.newPlot(document.getElementById('graph-3d-hills'),
+    [{
+      x: xData,
+      y: yData,
+      z: zData,
+      type: 'surface',
+      contours: {
+        z: {
+          show:true,
+          usecolormap: true,
+          highlightcolor:"#42f462",
+          project:{z: true}
+        }
+      }
+    }],
+
+    {
+      scene: {camera:
+        {
+          // eye: {x: 0, y: 0, z: -2}
+        }
+      },
+    }
+
+
+  );
+
+
+}
+
+
 function myRound(n) {
   return Math.round(1000*n)/1000;
 }
@@ -128,6 +319,50 @@ function getPeaks(data2d)
 
   return peaks;
 }
+
+
+function lt(a,b) {
+  return a < b && Math.abs(a - b) > 0.01;
+}
+
+function getPeaks3d(data3d)
+{
+  // eventually i would like a better way of doing this
+  // but for now let's do something very simple
+
+  let [xArr, yArr, zArr] = data3d;
+
+  let peaks = [{
+    x: 1,
+    y: 1,
+    z: zArr[0][0]
+  }];
+
+  for (let x = 1; x < xArr.length - 1; x++) {
+    for (let y = 1; y < x; y++) {
+      let [ zUpLeft, zUp, zUpRight,
+            zLeft, z, zRight,
+            zDownLeft, zDown, zDownRight ] =
+          [ zArr[x-1][y+1], zArr[x][y+1], zArr[x+1][y+1],
+            zArr[x-1][y], zArr[x][y], zArr[x+1][y],
+            zArr[x-1][y-1], zArr[x][y-1], zArr[x+1][y-1] ];
+
+      if (lt(z, zUpLeft) && lt(z, zUp) && lt(z, zUpRight) &&
+          lt(z, zLeft) && lt(z, zRight) &&
+          lt(z, zDownLeft) && lt(z, zDown) && lt(z, zDownRight))
+      {
+        peaks.push({
+          x: 1 + x*0.01,
+          y: 1 + y*0.01,
+          z: z
+        });
+      }
+    }
+  }
+
+  return peaks.sort((a,b) => a.z > b.z);
+}
+
 
 function findSlope(array,index){
   return array[index+2]-array[index-2];

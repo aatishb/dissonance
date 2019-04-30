@@ -47,11 +47,11 @@ function getData3d() {
   let maxZ = 0;
   let dataArray = [];
 
-  for (let r = 1; r <= 2; r += 0.01) {
+  for (let r = 1; r <= 2; r += 0.005) {
 
     let dataArraySlice = [];
 
-    for (let s = 1; s <= 2; s += 0.01) {
+    for (let s = 1; s <= 2; s += 0.005) {
 
       let dissonanceScore = 0;
 
@@ -82,7 +82,7 @@ function getData3d() {
   let xData = [];
   let yData = [];
 
-  for (let r = 1; r < 2; r += 0.01) {
+  for (let r = 1; r < 2; r += 0.005) {
     xData.push(r);
     yData.push(r);
   }
@@ -143,13 +143,13 @@ function make3DGraph([xData, yData, zData], peaks) {
 
 
   let trace2 = {
-    /*
+
     x: peaks.map(e => e.x),
     y: peaks.map(e => e.y),
     name: 'minima',
     mode: 'markers',
     marker: { size: 12, opacity: 0.5 }
-    */
+
   }
 
 
@@ -158,8 +158,8 @@ function make3DGraph([xData, yData, zData], peaks) {
   );
 
 
-  Plotly.newPlot(document.getElementById('graph-3d-hills'),
-    [{
+
+  let trace3 = {
       x: xData,
       y: yData,
       z: zData,
@@ -172,7 +172,23 @@ function make3DGraph([xData, yData, zData], peaks) {
           project:{z: true}
         }
       }
-    }],
+    };
+
+  let trace4 = {
+
+    x: peaks.map(e => e.x),
+    y: peaks.map(e => e.y),
+    y: peaks.map(e => e.z),
+    type: 'scatter3d',
+    name: 'minima',
+    mode: 'markers',
+    marker: { size: 50, opacity: 0.5 }
+
+  }
+
+
+  Plotly.newPlot(document.getElementById('graph-3d-hills'),
+    [trace3, trace4],
 
     {
       scene: {camera:
@@ -202,7 +218,7 @@ let intervalLabels = [
   'minor third',
   'major third',
   'perfect fourth',
-  'dimished fifth / tritone',
+  'tritone',
   'perfect fifth',
   'minor sixth',
   'major sixth',
@@ -232,13 +248,41 @@ function getIntervals(peaks) {
   return intervals;
 }
 
+
+function getTriads(peaks) {
+  let intervals = [];
+
+  for (let peak of peaks) {
+    let x = peak.x;
+    let m1 = intervalToMidi(x);
+
+    let y = peak.y;
+    let m2 = intervalToMidi(y);
+
+    intervals.push({
+      x: x,
+      y: y,
+      z: peak.z,
+      midi1: m1,
+      midi2: m2,
+      note1: midiToNote(m1),
+      note2: midiToNote(m2),
+      interval1: intervalLabels[Math.round(m1) - 60],
+      interval2: intervalLabels[Math.round(m2) - 60]
+    })
+  }
+
+  //intervals.sort((a,b) => a.x < b.x);
+
+  return intervals;
+}
 function intervalToMidi(i) {
   return 12 * Math.log(i)/Math.log(2) + 60;
 }
 
 function midiToNote(m0) {
   let m = Math.round(m0);
-  return notes[m % 12] + String(Math.floor(m / 12));
+  return notes[m % 12];// + String(Math.floor(m / 12));
 }
 
 function ampToLoudness(amp) {
@@ -280,7 +324,7 @@ function getPeaks(data2d)
     y: yArr[0]
   }];
 
-  for (i = 1; i<yArr.length; i++)
+  for (let i = 1; i<yArr.length; i++)
   {
 
     // calculate derivative
@@ -322,45 +366,47 @@ function getPeaks(data2d)
 
 
 function lt(a,b) {
-  return a < b && Math.abs(a - b) > 0.01;
+  return a < b && Math.abs(a - b) > 0;
 }
 
-function getPeaks3d(data3d)
+function getPeaks3d(data3d, zCutoff)
 {
   // eventually i would like a better way of doing this
   // but for now let's do something very simple
 
   let [xArr, yArr, zArr] = data3d;
 
-  let peaks = [{
-    x: 1,
-    y: 1,
-    z: zArr[0][0]
-  }];
+  let peaks = [];
 
   for (let x = 1; x < xArr.length - 1; x++) {
     for (let y = 1; y < x; y++) {
-      let [ zUpLeft, zUp, zUpRight,
-            zLeft, z, zRight,
-            zDownLeft, zDown, zDownRight ] =
-          [ zArr[x-1][y+1], zArr[x][y+1], zArr[x+1][y+1],
-            zArr[x-1][y], zArr[x][y], zArr[x+1][y],
-            zArr[x-1][y-1], zArr[x][y-1], zArr[x+1][y-1] ];
 
-      if (lt(z, zUpLeft) && lt(z, zUp) && lt(z, zUpRight) &&
-          lt(z, zLeft) && lt(z, zRight) &&
-          lt(z, zDownLeft) && lt(z, zDown) && lt(z, zDownRight))
-      {
+      let isMinima = 1;
+
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (!(i == 0 && j == 0)) {
+              if (zArr[x][y] > zArr[x + i][y + j]) {
+                isMinima = 0;
+              }
+          }
+        }
+      }
+
+      if (isMinima) {
+        //console.log('peak found');
         peaks.push({
-          x: 1 + x*0.01,
-          y: 1 + y*0.01,
-          z: z
+          x: 1 + x*0.005,
+          y: 1 + y*0.005,
+          z: zArr[x][y]
         });
       }
+
+
     }
   }
 
-  return peaks.sort((a,b) => a.z > b.z);
+  return peaks.sort((a,b) => a.z > b.z).filter(a => a.z <= zCutoff);
 }
 
 

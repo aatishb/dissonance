@@ -11,6 +11,12 @@ th, td {
   text-align: left;
 }
 
+.center {
+  width: 60%;
+  margin: 0 auto;
+  padding: 0 0 10px 0;
+}
+
 .codeInput {
   width: 100%;
   height: 125px;

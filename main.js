@@ -13,20 +13,29 @@ let app = new Vue({
   data: {
     code: defaultCode,
     consonantIntervals: [],
-    consonantTriads: []
+    consonantTriads: [],
+    dissonanceCutoff: 0.4
   },
 
   methods: {
-    makeGraphs: function() {
+    make2DGraphs: function() {
       let data2d = getData2d(this.code);
-      let peaks = getPeaks(data2d);
-      make2DGraph(data2d, peaks);
-      this.consonantIntervals = getIntervals(peaks);
+      let peaks2d = getPeaks(data2d);
+      make2DGraph(data2d, peaks2d);
+      this.consonantIntervals = getIntervals(peaks2d);
+    },
 
+    make3DGraphs: function() {
       let data3d = getData3d(this.code);
-      //peaks = getPeaks3d(data3d);
-      make3DGraph(data3d);
+      let peaks3d = getPeaks3d(data3d, this.dissonanceCutoff);
+      //console.log(peaks3d);
+      make3DGraph(data3d, peaks3d);
+      this.consonantTriads = getTriads(peaks3d);
+    },
 
+    makeGraphs: function() {
+      this.make2DGraphs();
+      this.make3DGraphs();
     }
   },
 

@@ -1,5 +1,4 @@
-let refFreq;
-let maxInterval = 2.2;
+let refFreq, maxInterval = 2.3;
 let slopeCutoff = 0;
 let freqArray, ampArray;
 
@@ -12,7 +11,7 @@ function getData2d(code) {
   let xArr = [];
   let yArr = [];
 
-  for (let c = 1; c < maxInterval; c += 0.005) {
+  for (let c = 1; c < maxInterval; c += 0.001) {
     xArr.push(c);
     let dissonanceScore = 0;
 
@@ -48,11 +47,11 @@ function getData3d() {
   let maxZ = 0;
   let dataArray = [];
 
-  for (let r = 1; r <= maxInterval; r += 0.005) {
+  for (let r = 1; r <= 2; r += 0.005) {
 
     let dataArraySlice = [];
 
-    for (let s = 1; s <= maxInterval; s += 0.005) {
+    for (let s = 1; s <= 2; s += 0.005) {
 
       let dissonanceScore = 0;
 
@@ -83,7 +82,7 @@ function getData3d() {
   let xData = [];
   let yData = [];
 
-  for (let r = 1; r < maxInterval; r += 0.005) {
+  for (let r = 1; r < 2; r += 0.005) {
     xData.push(r);
     yData.push(r);
   }
@@ -263,8 +262,7 @@ function getTriads(peaks) {
     intervals.push({
       x: x,
       y: y,
-      dissonance: myRound(peak.z),
-      slope: myRound(peak.slope),
+      z: peak.z,
       midi1: m1,
       midi2: m2,
       note1: midiToNote(m1),
@@ -273,6 +271,8 @@ function getTriads(peaks) {
       interval2: intervalLabels[Math.round(m2) - 60]
     })
   }
+
+  //intervals.sort((a,b) => a.x < b.x);
 
   return intervals;
 }
@@ -323,29 +323,41 @@ function getPeaks(data2d)
     x: xArr[0],
     y: yArr[0]
   }];
-  let dybydxArray = yArr.map((y,i) => delta(yArr, i) / delta(xArr, i) );
 
-  for (let i = 0; i < yArr.length - 1; i++)
+  for (let i = 1; i<yArr.length; i++)
   {
 
     // calculate derivative
-    let prevPoint = {
-      index: i - 1,
-      x: xArr[i - 1],
-      y: yArr[i - 1],
-      slope: dybydxArray[i - 1]
-    };
-
-    let currentPoint = {
+    let point1 = {
       index: i,
       x: xArr[i],
-      y: yArr[i],
-      slope: dybydxArray[i]
+      y: smoothSlope(yArr, i)
     };
 
-    if (prevPoint.slope < -slopeCutoff && currentPoint.slope > slopeCutoff )
+    let point2 = {
+      index: i + 1,
+      x: xArr[i + 1],
+      y: smoothSlope(yArr, i + 1)
+    };
+
+    if( point1.y <= 0 && point2.y > 0 )
     {
-      peaks.push(currentPoint);
+
+      let minima = {};
+
+      // linearly interpolate derivative to find frequency where derivative crosses zero
+      let secondDerivative = (point2.y - point1.y) / (point2.x - point1.x);
+      minima.x = point1.x - point1.y/secondDerivative;
+
+      // filter for peaks with slope steeper than cutoff
+      if(secondDerivative > slopeCutoff)
+      {
+        // linearly interpolate FFT to find energy where derivative crosses zero
+        let slope = yArr[point2.index] - yArr[point1.index];
+        minima.y = yArr[point1.index] + slope * (minima.x - point1.x);
+
+        peaks.push(minima);
+      }
     }
   }
 
@@ -366,21 +378,16 @@ function getPeaks3d(data3d, zCutoff)
 
   let peaks = [];
 
-  for (let x = 4; x < xArr.length - 4; x++) {
-    for (let y = 4; y < x; y++) {
+  for (let x = 1; x < xArr.length - 1; x++) {
+    for (let y = 1; y < x; y++) {
 
-      let score = 0;
       let isMinima = 1;
-      let count = 0;
 
-      for (let i = -4; i <= 4; i++) {
-        for (let j = -4; j <= 4; j++) {
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
           if (!(i == 0 && j == 0)) {
               if (zArr[x][y] > zArr[x + i][y + j]) {
                 isMinima = 0;
-              } else {
-                score += (zArr[x + i][y + j] - zArr[x][y])/Math.sqrt(i*i + j*j);
-                count++;
               }
           }
         }
@@ -389,11 +396,9 @@ function getPeaks3d(data3d, zCutoff)
       if (isMinima) {
         //console.log('peak found');
         peaks.push({
-          x: 1 + x * 0.005,
-          y: 1 + y * 0.005,
-          z: zArr[x][y],
-          slope: score,
-          score: score * (1 - zArr[x][y])
+          x: 1 + x*0.005,
+          y: 1 + y*0.005,
+          z: zArr[x][y]
         });
       }
 
@@ -401,12 +406,12 @@ function getPeaks3d(data3d, zCutoff)
     }
   }
 
-  return peaks.filter(a => a.z <= zCutoff).filter(a => a.slope > slopeCutoff).sort((a,b) => a.score < b.score);
+  return peaks.sort((a,b) => a.z > b.z).filter(a => a.z <= zCutoff);
 }
 
 
-function delta(arr, i){
-  return arr[i + 1] - arr[i];
+function findSlope(array,index){
+  return array[index+2]-array[index-2];
 }
 
 function smoothSlope(array,index){

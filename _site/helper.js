@@ -241,7 +241,7 @@ function lt(a,b) {
   return a < b && Math.abs(a - b) > 0;
 }
 
-function getPeaks3d(data3d, stepSize3d)
+function getPeaks3d(data3d, stepSize3d, smoothing)
 {
   // eventually i would like a better way of doing this
   // but for now let's do something very simple
@@ -249,7 +249,6 @@ function getPeaks3d(data3d, stepSize3d)
   // calculate laplacian of gaussian and store in array
 
   let filter = [];
-  let smoothing = 1.5;
 
   let sum = 0;
   let count = 0;

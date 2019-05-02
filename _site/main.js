@@ -17,7 +17,8 @@ let app = new Vue({
 
     stepSize3d: 0.005,
     dissonanceCutoff3d: 1,
-    curvatureCutoff3d: 0
+    curvatureCutoff3d: 0,
+    smoothing: 1.5
   },
 
   computed: {
@@ -35,7 +36,7 @@ let app = new Vue({
       return getData3d(this.code, this.stepSize3d);
     },
     peaks3d() {
-      return getPeaks3d(this.data3d, this.stepSize3d)
+      return getPeaks3d(this.data3d, this.stepSize3d, this.smoothing)
         .filter(e => e.z <= this.dissonanceCutoff3d)
         .filter(e => e.curvature >= this.curvatureCutoff3d);
     },

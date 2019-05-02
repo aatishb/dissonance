@@ -6,7 +6,7 @@ function myRound(n) {
   return Math.round(1000*n)/1000;
 }
 
-function getData2d(code) {
+function getData2d(code, stepSize2d) {
   eval(code);
 
   let numPartials = freqArray.length;
@@ -15,7 +15,7 @@ function getData2d(code) {
   let xArr = [];
   let yArr = [];
 
-  for (let c = 1; c < maxInterval; c += 0.001) {
+  for (let c = 1 - stepSize2d; c < maxInterval; c += stepSize2d) {
     xArr.push(c);
     let dissonanceScore = 0;
 
@@ -39,7 +39,7 @@ function getData2d(code) {
 }
 
 
-function getData3d(code) {
+function getData3d(code, stepSize3d) {
   let xArr = [];
   let yArr = [];
   let zArr = [];
@@ -51,11 +51,11 @@ function getData3d(code) {
   let maxZ = 0;
   let dataArray = [];
 
-  for (let r = 1; r <= maxInterval; r += 0.005) {
+  for (let r = 1; r <= maxInterval; r += stepSize3d) {
 
     let dataArraySlice = [];
 
-    for (let s = 1; s <= maxInterval; s += 0.005) {
+    for (let s = 1; s <= maxInterval; s += stepSize3d) {
 
       let dissonanceScore = 0;
 
@@ -86,7 +86,7 @@ function getData3d(code) {
   let xData = [];
   let yData = [];
 
-  for (let r = 1; r < maxInterval; r += 0.005) {
+  for (let r = 1; r < maxInterval; r += stepSize3d) {
     xData.push(r);
     yData.push(r);
   }
@@ -130,8 +130,6 @@ function getIntervals(peaks) {
     })
   }
 
-  //intervals.sort((a,b) => a.x < b.x);
-
   return intervals;
 }
 
@@ -149,8 +147,8 @@ function getTriads(peaks) {
     intervals.push({
       x: x,
       y: y,
-      dissonance: myRound(peak.z),
-      slope: myRound(peak.slope),
+      dissonance: peak.z,
+      curvature: peak.curvature,
       midi1: m1,
       midi2: m2,
       note1: midiToNote(m1),
@@ -243,7 +241,7 @@ function lt(a,b) {
   return a < b && Math.abs(a - b) > 0;
 }
 
-function getPeaks3d(data3d)
+function getPeaks3d(data3d, stepSize3d)
 {
   // eventually i would like a better way of doing this
   // but for now let's do something very simple
@@ -308,10 +306,10 @@ function getPeaks3d(data3d)
 
       if (isMinima) {
         peaks.push({
-          x: 1 + x * 0.005,
-          y: 1 + y * 0.005,
+          x: 1 + x * stepSize3d,
+          y: 1 + y * stepSize3d,
           z: zArr[x][y],
-          slope: score
+          curvature: score
         });
       }
 
@@ -319,20 +317,9 @@ function getPeaks3d(data3d)
     }
   }
 
-  return peaks.sort((a,b) => a.slope < b.slope);
+  return peaks.sort((a,b) => a.curvature < b.curvature);
 }
-
 
 function delta(arr, i){
   return arr[i + 1] - arr[i];
 }
-
-function smoothSlope(array,index){
-  return findSlope(array,index);
-  //return (findSlope(array,index-1)+findSlope(array,index)+findSlope(array,index+1))/3;
-  //return (findSlope(array,index-2)+2*findSlope(array,index-1)+3*findSlope(array,index)+2*findSlope(array,index+1)+findSlope(array,index+2))/9;
-  //return (findSlope(array,index-3)+3*findSlope(array,index-2)+6*findSlope(array,index-1)+7*findSlope(array,index)+6*findSlope(array,index+1)+3*findSlope(array,index+3)+findSlope(array,index+3))/27;
-}
-
-console.log('helper script loaded');
-

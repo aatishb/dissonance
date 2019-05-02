@@ -54,6 +54,18 @@
 
       <p>Hover over dark blue areas in the heatmap below to identify consonant musical triads.</p>
 
+      <!--
+      <div class="center">
+      <input type="range" min="0" max="1" step="0.01" v-model="dissonanceCutoff3d"></input>
+      &ensp;Dissonance cutoff: {{dissonanceCutoff3d}}
+      </div>
+
+      <div class="center">
+      <input type="range" min="-1" max="1" step="0.01" v-model="curvatureCutoff3d"></input>
+      &ensp;Curvature cutoff: {{curvatureCutoff3d}}
+      </div>
+      -->
+
       <p>The table below provides information on the identified consonant triads, ranked in increasing order of dissonance.</p>
 
       <triad-table :triads="consonantTriads"></triad-table>

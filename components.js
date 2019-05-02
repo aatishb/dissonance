@@ -63,7 +63,7 @@ Vue.component('triad-table', {
     <th>Midi Notes</th>
     <th>Closest Piano Notes</th>
     <th>Dissonance</th>
-    <th>Slope</th>
+    <th>Curvature</th>
   </tr>
 
   <tr v-for="triad in triads">
@@ -71,8 +71,8 @@ Vue.component('triad-table', {
     <td>{{triad.interval2}}, {{triad.interval1}}</td>
     <td>{{myRound(triad.midi2)}}, {{myRound(triad.midi1)}}</td>
     <td>C, {{triad.note2}}, {{triad.note1}}</td>
-    <td>{{triad.dissonance}}</td>
-    <td>{{triad.slope}}</td>
+    <td>{{myRound(triad.dissonance)}}</td>
+    <td>{{myRound(triad.curvature)}}</td>
   </tr>
 </table>`
 

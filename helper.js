@@ -362,6 +362,44 @@ function getPeaks3d(data3d, zCutoff)
   // eventually i would like a better way of doing this
   // but for now let's do something very simple
 
+  // calculate laplacian of gaussian and store in array
+
+  let filter = [];
+  let smoothing = 1.5;
+
+  let sum = 0;
+  let count = 0;
+
+  for (let i = -4; i <= 4; i++) {
+    let arr = [];
+    for (let j = -4; j <= 4; j++) {
+      let rSq = i*i + j*j;
+      let cSq = smoothing * smoothing;
+      let ratio = rSq / (2*cSq);
+      let preFactor = -1/(Math.PI * cSq*cSq);
+      let laplacianOfGaussian = preFactor * Math.exp( -ratio ) * (1 - ratio);
+      arr.push(laplacianOfGaussian);
+      sum += laplacianOfGaussian;
+      count += 1;
+    }
+    filter.push(arr);
+  }
+
+  let avg = sum/count;
+  filter.map(e => e.map(j => j - avg));
+
+  /*
+  let output = '';
+  for (let i = 0; i <= 8; i++) {
+    for (let j = 0; j <= 8; j++) {
+      output += myRound(filter[i][j]);
+      output += ',';
+    }
+    output += '\n';
+  }
+  console.log(output);
+  */
+
   let [xArr, yArr, zArr] = data3d;
 
   let peaks = [];
@@ -371,29 +409,23 @@ function getPeaks3d(data3d, zCutoff)
 
       let score = 0;
       let isMinima = 1;
-      let count = 0;
 
       for (let i = -4; i <= 4; i++) {
         for (let j = -4; j <= 4; j++) {
-          if (!(i == 0 && j == 0)) {
-              if (zArr[x][y] > zArr[x + i][y + j]) {
-                isMinima = 0;
-              } else {
-                score += (zArr[x + i][y + j] - zArr[x][y])/Math.sqrt(i*i + j*j);
-                count++;
-              }
+          if (!(i == 0 && j == 0) && (zArr[x][y] > zArr[x + i][y + j])) {
+            isMinima = 0;
+          } else {
+            score += zArr[x + i][y + j] * filter[i + 4][j + 4];
           }
         }
       }
 
       if (isMinima) {
-        //console.log('peak found');
         peaks.push({
           x: 1 + x * 0.005,
           y: 1 + y * 0.005,
           z: zArr[x][y],
-          slope: score,
-          score: score * (1 - zArr[x][y])
+          slope: score
         });
       }
 
@@ -401,7 +433,7 @@ function getPeaks3d(data3d, zCutoff)
     }
   }
 
-  return peaks.filter(a => a.z <= zCutoff).filter(a => a.slope > slopeCutoff).sort((a,b) => a.score < b.score);
+  return peaks.filter(a => a.z <= zCutoff).filter(a => a.slope > slopeCutoff).sort((a,b) => a.slope < b.slope);
 }
 
 

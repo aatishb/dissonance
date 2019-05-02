@@ -2,9 +2,7 @@ let defaultCode = `freqArray = [1, 2, 3, 4, 5, 6]; // frequency of partials (in 
 ampArray = [1, 1, 1, 1, 1, 1]; // amplitude of partials (should match freqArray's length)
 
 refFreq = 261.6256; // fundamental frequency (in Hz)
-minInterval = 0.9; // dissonance graph starts at this value (unison = 1.0)
 maxInterval = 2.05; // dissonance graph ends at this value (octave = 2.0)
-slopeCutoff = 0; // higher = fewer minima, 0 = all minima
 `;
 
 let app = new Vue({

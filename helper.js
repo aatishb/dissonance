@@ -318,7 +318,7 @@ function getPeaks(data2d)
 
   let [xArr, yArr] = data2d;
 
-  //let slopeCutoff = 0;   // more negative = fewer peaks
+  let slopeCutoff = 1;   // more negative = fewer peaks
   let peaks = [{
     x: xArr[0],
     y: yArr[0]

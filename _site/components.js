@@ -60,19 +60,23 @@ Vue.component('triad-table', {
   <tr>
     <th>Interval Ratios</th>
     <th>Interval Names</th>
-    <th>Midi Notes</th>
     <th>Closest Piano Notes</th>
+    <th>Midi Notes</th>
+    <!--
     <th>Dissonance</th>
     <th>Curvature</th>
+    -->
   </tr>
 
   <tr v-for="triad in triads">
     <td>{{myRound(triad.y)}}, {{myRound(triad.x)}}</td>
     <td>{{triad.interval2}}, {{triad.interval1}}</td>
-    <td>{{myRound(triad.midi2)}}, {{myRound(triad.midi1)}}</td>
     <td>C, {{triad.note2}}, {{triad.note1}}</td>
+    <td>{{Math.round(100*triad.midi2)/100}}, {{Math.round(100*triad.midi1)/100}}</td>
+    <!--
     <td>{{myRound(triad.dissonance)}}</td>
     <td>{{myRound(triad.curvature)}}</td>
+    -->
   </tr>
 </table>`
 

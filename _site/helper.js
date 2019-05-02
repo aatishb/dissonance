@@ -1,7 +1,10 @@
 let refFreq;
 let maxInterval = 2.2;
-let slopeCutoff = 0;
 let freqArray, ampArray;
+
+function myRound(n) {
+  return Math.round(1000*n)/1000;
+}
 
 function getData2d(code) {
   eval(code);
@@ -12,7 +15,7 @@ function getData2d(code) {
   let xArr = [];
   let yArr = [];
 
-  for (let c = 1; c < maxInterval; c += 0.005) {
+  for (let c = 1; c < maxInterval; c += 0.001) {
     xArr.push(c);
     let dissonanceScore = 0;
 
@@ -36,12 +39,12 @@ function getData2d(code) {
 }
 
 
-function getData3d() {
+function getData3d(code) {
   let xArr = [];
   let yArr = [];
   let zArr = [];
 
-  eval(this.code);
+  eval(code);
   let numPartials = freqArray.length;
   let loudnessArray = ampArray.map(ampToLoudness);
 
@@ -91,123 +94,6 @@ function getData3d() {
   let zData = dataArray.map(e => e.map(e => e/maxZ))
 
   return [xData, yData, zData];
-}
-
-
-function make2DGraph([xArr, yArr], intervals) {
-
-  let trace1 = {
-      x: xArr,
-      y: yArr,
-      name: 'dissonance'
-    };
-
-  let trace2 = {
-    x: intervals.map(e => e.x),
-    y: intervals.map(e => e.y),
-    name: 'minima',
-    mode: 'markers',
-    marker: { size: 12, opacity: 0.5 }
-  }
-
-  Plotly.newPlot(document.getElementById('graph-2d'),
-    [trace1, trace2],
-    {
-
-      margin: { t: 0 },
-      xaxis: {
-        title: {
-          text: 'interval (frequency ratio)'
-        },
-      },
-      yaxis: {
-        title: {
-          text: 'Normalized Spectral Dissonance'
-        }
-      }
-
-    }
-  );
-
-}
-
-
-function make3DGraph([xData, yData, zData], peaks) {
-
-  let trace1 = {
-      x: xData,
-      y: yData,
-      z: zData,
-      type: 'heatmap',
-      colorscale: 'Viridis'
-    };
-
-
-  let trace2 = {
-
-    x: peaks.map(e => e.x),
-    y: peaks.map(e => e.y),
-    name: 'minima',
-    mode: 'markers',
-    marker: { size: 12, opacity: 0.5 }
-
-  }
-
-
-  Plotly.newPlot(document.getElementById('graph-3d-heatmap'),
-     [trace1, trace2]
-  );
-
-
-
-  let trace3 = {
-      x: xData,
-      y: yData,
-      z: zData,
-      type: 'surface',
-      contours: {
-        z: {
-          show:true,
-          usecolormap: true,
-          highlightcolor:"#42f462",
-          project:{z: true}
-        }
-      }
-    };
-
-  let trace4 = {
-
-    x: peaks.map(e => e.x),
-    y: peaks.map(e => e.y),
-    y: peaks.map(e => e.z),
-    type: 'scatter3d',
-    name: 'minima',
-    mode: 'markers',
-    marker: { size: 50, opacity: 0.5 }
-
-  }
-
-
-  Plotly.newPlot(document.getElementById('graph-3d-hills'),
-    [trace3, trace4],
-
-    {
-      scene: {camera:
-        {
-          // eye: {x: 0, y: 0, z: -2}
-        }
-      },
-    }
-
-
-  );
-
-
-}
-
-
-function myRound(n) {
-  return Math.round(1000*n)/1000;
 }
 
 let notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -318,7 +204,6 @@ function getPeaks(data2d)
 
   let [xArr, yArr] = data2d;
 
-  let slopeCutoff = 1;   // more negative = fewer peaks
   let peaks = [{
     x: xArr[0],
     y: yArr[0]
@@ -340,10 +225,11 @@ function getPeaks(data2d)
       index: i,
       x: xArr[i],
       y: yArr[i],
-      slope: dybydxArray[i]
+      slope: dybydxArray[i],
+      curvature: dybydxArray[i] - dybydxArray[i - 1]
     };
 
-    if (prevPoint.slope < -slopeCutoff && currentPoint.slope > slopeCutoff )
+    if (prevPoint.slope < 0 && currentPoint.slope > 0 )
     {
       peaks.push(currentPoint);
     }
@@ -357,7 +243,7 @@ function lt(a,b) {
   return a < b && Math.abs(a - b) > 0;
 }
 
-function getPeaks3d(data3d, zCutoff)
+function getPeaks3d(data3d)
 {
   // eventually i would like a better way of doing this
   // but for now let's do something very simple
@@ -433,7 +319,7 @@ function getPeaks3d(data3d, zCutoff)
     }
   }
 
-  return peaks.filter(a => a.z <= zCutoff).filter(a => a.slope > slopeCutoff).sort((a,b) => a.slope < b.slope);
+  return peaks.sort((a,b) => a.slope < b.slope);
 }
 
 

@@ -10,37 +10,30 @@ let app = new Vue({
   el: '#dissonance',
 
   data: {
-    code: defaultCode,
-    consonantIntervals: [],
-    consonantTriads: [],
-    dissonanceCutoff: 0.5
+    code: defaultCode
   },
 
-  methods: {
-    make2DGraphs: function() {
-      let data2d = getData2d(this.code);
-      let peaks2d = getPeaks(data2d);
-      make2DGraph(data2d, peaks2d);
-      this.consonantIntervals = getIntervals(peaks2d);
+  computed: {
+    data2d() {
+      return getData2d(this.code);
     },
-
-    make3DGraphs: function() {
-      let data3d = getData3d(this.code);
-      let peaks3d = getPeaks3d(data3d, this.dissonanceCutoff);
-      //console.log(peaks3d);
-      make3DGraph(data3d, peaks3d);
-      this.consonantTriads = getTriads(peaks3d);
+    peaks2d() {
+      return getPeaks(this.data2d);
     },
-
-    makeGraphs: function() {
-      this.make2DGraphs();
-      this.make3DGraphs();
+    consonantIntervals() {
+      return getIntervals(this.peaks2d);
+    },
+    data3d() {
+      return getData3d(this.code);
+    },
+    peaks3d() {
+      return getPeaks3d(this.data3d);
+    },
+    consonantTriads() {
+      return getTriads(this.peaks3d);
     }
-  },
-
-  mounted: function() {
-    this.makeGraphs();
   }
+
 })
 
 console.log('main script loaded');

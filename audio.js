@@ -1,3 +1,5 @@
+let synthA, synthB, synthC;
+
 function startAudio() {
 
   let audioCtx = new AudioContext();
@@ -107,13 +109,13 @@ function startAudio() {
 
   }
 
-  let synthA = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
+  synthA = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
   synthA.connect(audioCtx.destination);
 
-  let synthB = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
+  synthB = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
   synthB.connect(audioCtx.destination);
 
-  let synthC = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
+  synthC = new mySynth([1, 2, 3, 4, 5, 6], [1, 1/2, 1/3, 1/4, 1/5, 1/6]);
   synthC.connect(audioCtx.destination);
 
   //let t = audioCtx.currentTime;

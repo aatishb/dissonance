@@ -17,13 +17,13 @@
 
       <div id="title">
         <h1>Dissonance</h1>
-        <h3>Calculate Consonant Musical Intervals Using a Sound's Spectrum</h3>
+        <h3>A Journey Through Musical Possibility Space</h3>
       </div>
 
 
       <h2>From Spectrum to Scale</h2>
 
-      <p>In this page, we'll derive musical systems for real and imagined instruments. Starting from any sound, we'll attempt to work out the musical scales and chords that sound the most consonant (or at the least dissonant) for this particular sound. Although the page has a built-in default sound, I'll show you how you can change this sound to whatever you like, and everything on this page will then reference <i>your own</i> sound.</p>
+      <p>In this page, we'll derive musical systems for real and imagined instruments. Starting from any sound, we'll attempt to work out the musical scales and chords that sound the most consonant (or at the least dissonant) for this particular sound. In other words, we're discovering musical scales & chords by analyzing the spectrum of a sound. Although the page has a built-in default sound, I'll show you how you can change this sound to whatever you like, and everything on this page will then refer to <i>your</i> sound.</p>
 
       <p>To hear the sound, press the button below.</p>
 
@@ -42,11 +42,11 @@
       <!--<code-editor :code.sync="code"> </code-editor>-->
 
       <h2>Consonant Intervals</h2>
-      <p>An interval is two notes that are played together. Imagine you made two copies of the sound from above. If you fixed the pitch of one sound, and then slowly varied the pitch of the second sound, what would you hear? For some musical intervals, the combination would sound dissonant. For others, it would sound mroe consonant.</p>
+      <p>An interval is two notes that are played together. Imagine you made two copies of the sound from above. If you fixed the pitch of one sound, and then slowly varied the pitch of the second sound, what would you hear? For some musical intervals, the combination would sound dissonant. At certain special intervals, the sound becomes more consonant.</p>
 
       <p>Below is a graph of this dissonance.  When both sounds have the same frequency, they sound perfectly in sync (in unison), and so there is no perceived dissonance. So the y axis (which measures the dissonance) is zero at the beginning of the graph, when the ratio of pitches is 1.
 
-      <p>Try it out! Click on any point on the graph to hear what that musical interval (combination of tones) sounds like. Do the dips sound any different from the peaks?</p>
+      <p>Try it out. Click on any point on the graph to hear what that musical interval (combination of tones) sounds like. Do the dips sound any different from the peaks?</p>
 
       <graph-intervals :data="data2d" :intervals="consonantIntervals" @plotclicked="startAudio($event)"></graph-intervals>
 
@@ -59,7 +59,7 @@
 
       <h2>Consonant Triads</h2>
 
-      <p>Next, let's think about what happens when we play three notes together. So instead of intervals, we'll now consider triads, which are musical chords consisting of 3 notes played together. We have one sound that's fixed, and two copies whose pitch we will vary. Now, instead of generating a dissonance graph like before, we instead get a dissonance surface! The x and y axes represent how far in pitch the two sounds are with respect to the fixed reference.</p>
+      <p>Next, let's think about what happens when we play three notes together. So instead of intervals, we'll now consider triads, which are musical chords consisting of 3 notes played together. We have one sound that's fixed, and two more identical sounds whose pitch we will vary. Now, instead of generating a dissonance graph like before, we get a dissonance surface. The x and y axes represent how far in pitch the two sounds are with respect to the fixed reference.</p>
 
       <p>Take a look, and click and drag around.</p>
 
@@ -93,7 +93,7 @@
       <triad-table :triads="consonantTriads" @play="startAudio($event)"></triad-table>
 
       <h2>References</h2>
-      <p>The algorithm used in this article is developed by William Sethares and explained in detail in his excellent book <a href ="http://sethares.engr.wisc.edu/ttss.html">Tuning, Timbre, Spectrum, Scale</a>. I pulled values of parameters from this <a href="https://gist.github.com/endolith/3066664">Python port</a> of Sethares' work. The code for this page is available on <a href="https://github.com/aatishb/dissonance">Github</a>.</p>
+      <p>The algorithm used in this article is developed by William Sethares and explained in detail in his excellent book <a href ="http://sethares.engr.wisc.edu/ttss.html">Tuning, Timbre, Spectrum, Scale</a>. I pulled some values of parameters from this <a href="https://gist.github.com/endolith/3066664">Python port</a> of Sethares' work. The code for this page is available on <a href="https://github.com/aatishb/dissonance">Github</a>.</p>
 
     </div>
   </div>

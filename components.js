@@ -29,6 +29,7 @@ Vue.component('interval-table', {
 <table>
 
 <tr>
+  <th>Sound</th>
   <th>Interval Ratio</th>
   <th>Interval Name</th>
   <th>Midi Note</th>
@@ -36,6 +37,7 @@ Vue.component('interval-table', {
 </tr>
 
 <tr v-for="interval in intervals">
+  <td><button @click="$emit('play', [1, interval.x])">Play</button></td>
   <td>{{myRound(interval.x)}}</td>
   <td>{{interval.interval}}</td>
   <td>{{myRound(interval.midi)}}</td>
@@ -58,6 +60,7 @@ Vue.component('triad-table', {
 <table>
 
   <tr>
+    <th>Sound</th>
     <th>Interval Ratios</th>
     <th>Interval Names</th>
     <th>Closest Piano Notes</th>
@@ -69,6 +72,7 @@ Vue.component('triad-table', {
   </tr>
 
   <tr v-for="triad in triads">
+    <td><button @click="$emit('play', [1, triad.x, triad.y])">Play</button></td>
     <td>{{myRound(triad.y)}}, {{myRound(triad.x)}}</td>
     <td>{{triad.interval2}}, {{triad.interval1}}</td>
     <td>C, {{triad.note2}}, {{triad.note1}}</td>
@@ -114,9 +118,8 @@ Vue.component('graph-intervals', {
 
       component.$refs.graph2d.on('plotly_click', function(data) {
         let pts = data.points;
-        let xVal = pts[pts.length - 1].x;
-        let yVal = pts[pts.length - 1].y;
-        component.$emit('plotclicked', [xVal, yVal])
+        let xVal = pts[0].x;
+        component.$emit('plotclicked', [1, xVal])
       });
 
 

@@ -2,6 +2,8 @@ let audioCtx;
 
 function startAudio(spectrum, refFreq, tuning) {
 
+  //console.log(tuning);
+
   let freqArray = spectrum.freq;
   let ampArray = spectrum.amp;
 

@@ -20,6 +20,10 @@ let app = new Vue({
   },
 
   methods: {
+    myRound(n) {
+      return myRound(n);
+    },
+
     startAudio(tuning) {
       startAudio(this.spectrum, this.refFreq, tuning);
     }

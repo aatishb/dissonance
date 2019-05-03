@@ -1,13 +1,11 @@
-let refFreq;
-let maxInterval = 2.2;
-let freqArray, ampArray;
-
 function myRound(n) {
   return Math.round(1000*n)/1000;
 }
 
-function getData2d(code, stepSize2d) {
-  eval(code);
+function getData2d(spectrum, refFreq, maxInterval, stepSize2d) {
+
+  let freqArray = spectrum.freq;
+  let ampArray = spectrum.amp;
 
   let numPartials = freqArray.length;
   let loudnessArray = ampArray.map(ampToLoudness);
@@ -39,12 +37,15 @@ function getData2d(code, stepSize2d) {
 }
 
 
-function getData3d(code, stepSize3d) {
+function getData3d(spectrum, refFreq, maxInterval, stepSize3d) {
+
+  let freqArray = spectrum.freq;
+  let ampArray = spectrum.amp;
+
   let xArr = [];
   let yArr = [];
   let zArr = [];
 
-  eval(code);
   let numPartials = freqArray.length;
   let loudnessArray = ampArray.map(ampToLoudness);
 

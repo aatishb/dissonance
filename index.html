@@ -20,7 +20,7 @@
         <h3>Calculate Consonant Musical Intervals Using a Sound's Spectrum</h3>
       </div>
 
-      <button @click="startAudio">Play Sound</button>
+      <!--<button @click="startAudio([1, 1.25, 1.5])">Play Sound</button>-->
 
       <h2>From Spectrum to Scale</h2>
 
@@ -28,12 +28,12 @@
 
       <p>In the code below, we're inputting a harmonic sound, with partial frequencies f, 2f, 3f, 4f, 5f, 6f. In this default example, the partials are assumed to have equal amplitudes (i.e., they are equally loud). Try editing the code below and press Run. You can try changing the number of partials, their amplitudes (which should be between 0 and 1), or you can even try out inharmonic sounds! Whatever you enter here will affect the rest of this article.</p>
 
-      <code-editor :code.sync="code"> </code-editor>
+      <!--<code-editor :code.sync="code"> </code-editor>-->
 
       <h2>Consonant Intervals</h2>
       <p>Below is a graph of the spectral dissonance that occurs when the sound that you input above is played together with a second version of itelf. The frequency of the second sound is varied with respect to the first along the horizontal x-axis. The vertical y-axis measures the dissonance between the two sounds. If you hover over the dips in this graph, you'll discover consonant musical intervals. When you play the two sounds together at these special musical intervals, they'll sound more consonant, and when you play them at other intervals, they'll sound more dissonant. So together, these dips make up a special musical scale –– one that is most 'compatible' with this sound.</p>
 
-      <graph-intervals :data="data2d" :intervals="consonantIntervals"></graph-intervals>
+      <graph-intervals :data="data2d" :intervals="consonantIntervals" @plotclicked="startAudio($event)"></graph-intervals>
 
       <p>The table below lists these optimal musical intervals, obtained from the dips in the dissonance graph above (also highlighted in orange).</p>
 
@@ -48,7 +48,7 @@
 
       <p>Take a look.</p>
 
-      <graph-triads :data="data3d" :triads="consonantTriads">
+      <graph-triads :data="data3d" :triads="consonantTriads" @plotclicked="startAudio($event)">
         <p>This is the dissonance surface for the sound that we input above. Every point on this surface is a possible triad, i.e. a combination of three notes (there are infinitely many possibilities, because frequency varies continuously). The bottom of the valleys (shown in blue) correspond to more consonant musical chords, while the hills and mountain peaks (shown in red) correspond to more dissonant chords. You can drag the graph to rotate it and look under it.</p>
 
         <p>What we're after here are the valleys –– these are the least dissonant musical triads or chords. However, it's a little hard to identify thesee valleys from the view above. So instead, let's take a look at a heatmap of the same dissonance surface.</p>

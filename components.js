@@ -90,8 +90,10 @@ Vue.component('graph-intervals', {
   methods: {
     make2DGraph: function () {
 
-      Plotly.newPlot(this.$refs.graph2d,
-        [this.trace1, this.trace2],
+      let component = this;
+
+      Plotly.newPlot(component.$refs.graph2d,
+        [component.trace1, component.trace2],
 
         {
 
@@ -109,6 +111,14 @@ Vue.component('graph-intervals', {
 
         }
       );
+
+      component.$refs.graph2d.on('plotly_click', function(data) {
+        let pts = data.points;
+        let xVal = pts[pts.length - 1].x;
+        let yVal = pts[pts.length - 1].y;
+        component.$emit('plotclicked', [xVal, yVal])
+      });
+
 
     }
   },
@@ -165,13 +175,31 @@ Vue.component('graph-triads', {
   methods: {
     make3DGraph: function () {
 
-      Plotly.newPlot(this.$refs.graph3dheatmap,
-         [this.trace1, this.trace2]
+      let component = this;
+
+      Plotly.newPlot(component.$refs.graph3dheatmap,
+         [component.trace1, component.trace2]
       );
 
-      Plotly.newPlot(this.$refs.graph3dhills,
-        [this.trace3, this.trace4]
+      Plotly.newPlot(component.$refs.graph3dhills,
+        [component.trace3, component.trace4]
       );
+
+      component.$refs.graph3dheatmap.on('plotly_click', function(data) {
+        let pts = data.points;
+        let xVal = pts[pts.length - 1].x;
+        let yVal = pts[pts.length - 1].y;
+        component.$emit('plotclicked', [1, xVal, yVal])
+      });
+
+
+      component.$refs.graph3dhills.on('plotly_click', function(data) {
+        let pts = data.points;
+        let xVal = pts[pts.length - 1].x;
+        let yVal = pts[pts.length - 1].y;
+        component.$emit('plotclicked', [1, xVal, yVal])
+      });
+
 
     }
   },
@@ -235,7 +263,6 @@ Vue.component('graph-triads', {
         x: this.triads.map(e => e.x),
         y: this.triads.map(e => e.y),
         y: this.triads.map(e => e.z),
-        type: 'scatter3d',
         name: 'minima',
         mode: 'markers',
         marker: { size: 50, opacity: 0.5 }

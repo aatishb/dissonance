@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="./libraries/vue.js"></script>
+  <script src="./libraries/plotly.min.js"></script>
+  <script src="./libraries/p5.min.js"></script>
   <link rel="stylesheet" type="text/css" href="normalize.css">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
@@ -19,6 +19,8 @@
         <h1>Dissonance</h1>
         <h3>Calculate Consonant Musical Intervals Using a Sound's Spectrum</h3>
       </div>
+
+      <button @click="startAudio">Play Sound</button>
 
       <h2>From Spectrum to Scale</h2>
 
@@ -82,6 +84,7 @@
   </div>
 
   <!-- page code -->
+  <script src="audio.js"></script>
   <script src="helper.js"></script>
   <script src="components.js"></script>
   <script src="main.js"></script>

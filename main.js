@@ -21,6 +21,12 @@ let app = new Vue({
     smoothing: 1.5
   },
 
+  methods: {
+    startAudio: function() {
+      startAudio();
+    }
+  },
+
   computed: {
     data2d() {
       return getData2d(this.code, this.stepSize2d);

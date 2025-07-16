@@ -64,11 +64,26 @@
 
       <p>Take a look, and click and drag around.</p>
 
-      <graph-triads :data="data3d" :triads="consonantTriads" @plotclicked="startAudio($event)">
+      <div style="position: relative;">
+        <div v-if="isComputing3d" class="computing-indicator">
+          <p>Computing dissonance surface... {{Math.min(Math.round(computeProgress * 100), 100)}}%</p>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{width: Math.min(computeProgress * 100, 100) + '%'}"></div>
+          </div>
+        </div>
+
+        <graph-triads :data="data3d" :triads="consonantTriads" @plotclicked="startAudio($event)">
         <p>This is the dissonance surface for our sound. Every point on this surface is a triad, i.e. a combination of three notes (there are infinitely many possibilities, because frequency varies continuously). The bottom of the valleys (shown in blue) correspond to more consonant musical chords, while the hills and mountain peaks (shown in red) correspond to more dissonant chords. You can drag the graph to rotate it and look under it, and click on any point to hear the corresponding triad.</p>
 
         <p>What we're after here are the valleys –– these are the least dissonant musical triads, and together, these make up a list of musical chords. However, it's a little hard to identify these valleys from the surface above. So instead, let's take a look at a heatmap of this surface. The dark blue areas have lower dissonance than the yellow and light green areas.</p>
       </graph-triads>
+
+      <div v-if="isComputing3d" class="computing-indicator" style="position: absolute; top: 1200px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+        <p>Computing heatmap... {{Math.min(Math.round(computeProgress * 100), 100)}}%</p>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{width: Math.min(computeProgress * 100, 100) + '%'}"></div>
+        </div>
+      </div>
 
       <p>Click on different points on this heatmap to discover different chords. The sharp blue valleys have automatically been identified in orange. Do they sound different from other points? What makes these points special?</p>
 
@@ -92,6 +107,7 @@
       <p>The table below provides more information on these chords, marked in orange above.</p>
 
       <triad-table :triads="consonantTriads" @play="startAudio($event)"></triad-table>
+      </div>
 
       <h2>References</h2>
       <p>The algorithm used in this article is developed by William Sethares and explained in detail in his excellent book <a href ="http://sethares.engr.wisc.edu/ttss.html">Tuning, Timbre, Spectrum, Scale</a>. I pulled some values of parameters from this <a href="https://gist.github.com/endolith/3066664">Python port</a> of Sethares' work. The code for this page is available on <a href="https://github.com/aatishb/dissonance">Github</a>.</p>

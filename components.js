@@ -411,6 +411,10 @@ Vue.component('graph-triads', {
         {
           margin: { t: 0, r: 20, l: 20, b: 40 },
           showlegend: false
+        },
+        {
+          displayModeBar: false,
+          plotGlPixelRatio: 2
         }
       );
 

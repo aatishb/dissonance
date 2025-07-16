@@ -201,3 +201,37 @@ ul li {
   width: 90vw !important;
   height: 90vh !important;
 }
+
+/* Computing indicator styles */
+.computing-indicator {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(248, 249, 250, 0.95);
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  text-align: center;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  backdrop-filter: blur(5px);
+  width: 300px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+  max-width: 100%;
+}

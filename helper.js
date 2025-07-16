@@ -244,80 +244,109 @@ function lt(a,b) {
 
 function getPeaks3d(data3d, stepSize3d, smoothing)
 {
-  // eventually i would like a better way of doing this
-  // but for now let's do something very simple
-
-  // calculate laplacian of gaussian and store in array
-
-  let filter = [];
-
-  let sum = 0;
-  let count = 0;
-
-  for (let i = -4; i <= 4; i++) {
-    let arr = [];
-    for (let j = -4; j <= 4; j++) {
-      let rSq = i*i + j*j;
-      let cSq = smoothing * smoothing;
-      let ratio = rSq / (2*cSq);
-      let preFactor = -1/(Math.PI * cSq*cSq);
-      let laplacianOfGaussian = preFactor * Math.exp( -ratio ) * (1 - ratio);
-      arr.push(laplacianOfGaussian);
-      sum += laplacianOfGaussian;
-      count += 1;
-    }
-    filter.push(arr);
-  }
-
-  let avg = sum/count;
-  filter.map(e => e.map(j => j - avg));
-
-  /*
-  let output = '';
-  for (let i = 0; i <= 8; i++) {
-    for (let j = 0; j <= 8; j++) {
-      output += myRound(filter[i][j]);
-      output += ',';
-    }
-    output += '\n';
-  }
-  console.log(output);
-  */
-
   let [xArr, yArr, zArr] = data3d;
-
   let peaks = [];
-
-  for (let x = 4; x < xArr.length - 4; x++) {
-    for (let y = 4; y < x; y++) {
-
-      let score = 0;
-      let isMinima = 1;
-
-      for (let i = -4; i <= 4; i++) {
-        for (let j = -4; j <= 4; j++) {
-          if (!(i == 0 && j == 0) && (zArr[x][y] > zArr[x + i][y + j])) {
-            isMinima = 0;
-          } else {
-            score += zArr[x + i][y + j] * filter[i + 4][j + 4];
+  
+  // Adaptive radius based on step size for consistent detection
+  let baseRadius = Math.max(2, Math.round(0.02 / stepSize3d));
+  let prominenceRadius = Math.max(4, Math.round(0.05 / stepSize3d));
+  
+  // First pass: find all local minima
+  let candidates = [];
+  
+  for (let x = baseRadius; x < xArr.length - baseRadius; x++) {
+    for (let y = baseRadius; y < x; y++) { // Lower triangle only
+      
+      let centerValue = zArr[x][y];
+      let isLocalMin = true;
+      
+      // Check immediate neighborhood for local minimum
+      for (let dx = -baseRadius; dx <= baseRadius; dx++) {
+        for (let dy = -baseRadius; dy <= baseRadius; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          
+          let nx = x + dx;
+          let ny = y + dy;
+          
+          if (nx >= 0 && nx < zArr.length && ny >= 0 && ny < zArr[0].length) {
+            if (centerValue >= zArr[nx][ny]) {
+              isLocalMin = false;
+              break;
+            }
           }
         }
+        if (!isLocalMin) break;
       }
-
-      if (isMinima) {
-        peaks.push({
-          x: 1 + x * stepSize3d,
-          y: 1 + y * stepSize3d,
-          z: zArr[x][y],
-          curvature: score
+      
+      if (isLocalMin) {
+        candidates.push({
+          x: x,
+          y: y,
+          realX: 1 + x * stepSize3d,
+          realY: 1 + y * stepSize3d,
+          value: centerValue
         });
       }
-
-
     }
   }
-
-  return peaks.sort((a,b) => a.curvature < b.curvature);
+  
+  // Second pass: calculate prominence for each candidate
+  for (let candidate of candidates) {
+    let {x, y, value} = candidate;
+    
+    // Find minimum value within prominence radius
+    let minInRadius = value;
+    let maxInRadius = value;
+    
+    for (let dx = -prominenceRadius; dx <= prominenceRadius; dx++) {
+      for (let dy = -prominenceRadius; dy <= prominenceRadius; dy++) {
+        let nx = x + dx;
+        let ny = y + dy;
+        
+        if (nx >= 0 && nx < zArr.length && ny >= 0 && ny < zArr[0].length) {
+          let neighborValue = zArr[nx][ny];
+          minInRadius = Math.min(minInRadius, neighborValue);
+          maxInRadius = Math.max(maxInRadius, neighborValue);
+        }
+      }
+    }
+    
+    // Prominence is how much lower this point is than the highest point nearby
+    let prominence = maxInRadius - value;
+    
+    // Additional sharpness measure: average gradient magnitude
+    let gradientSum = 0;
+    let gradientCount = 0;
+    
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        
+        let nx = x + dx;
+        let ny = y + dy;
+        
+        if (nx >= 0 && nx < zArr.length && ny >= 0 && ny < zArr[0].length) {
+          gradientSum += Math.abs(zArr[nx][ny] - value);
+          gradientCount++;
+        }
+      }
+    }
+    
+    let avgGradient = gradientCount > 0 ? gradientSum / gradientCount : 0;
+    
+    // Combined metric: prominence weighted by sharpness
+    let curvature = prominence * (1 + avgGradient * 10);
+    
+    peaks.push({
+      x: candidate.realX,
+      y: candidate.realY,
+      z: value,
+      curvature: curvature
+    });
+  }
+  
+  // Sort by curvature (prominence * sharpness) descending
+  return peaks.sort((a,b) => b.curvature - a.curvature);
 }
 
 function delta(arr, i){

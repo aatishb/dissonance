@@ -10,13 +10,19 @@ let app = new Vue({
     refFreq: 261.6256,
     maxInterval: 2.05,
 
-    stepSize2d: 0.0001,
+    stepSize2d: 0.01,
     curvatureCutoff2d: 0.1,
 
-    stepSize3d: 0.005,
-    dissonanceCutoff3d: 1,
-    curvatureCutoff3d: 0,
-    smoothing: 1.5
+    stepSize3d: 0.001,
+    dissonanceCutoff3d: 0.4,
+    curvatureCutoff3d: 0.1,
+    smoothing: 1.5,
+    
+    // WebWorker state
+    data3dCache: null,
+    isComputing3d: false,
+    computeProgress: 0,
+    worker: null
   },
 
   methods: {
@@ -26,6 +32,57 @@ let app = new Vue({
 
     startAudio(tuning) {
       startAudio(this.spectrum, this.refFreq, tuning);
+    },
+
+    initWorker() {
+      if (this.worker) {
+        this.worker.terminate();
+      }
+      
+      this.worker = new Worker('./dissonance-worker.js');
+      
+      this.worker.onmessage = (e) => {
+        const { type, data, progress, message, error } = e.data;
+        
+        if (type === 'progress') {
+          this.computeProgress = progress;
+        } else if (type === 'complete') {
+          this.computeProgress = 1.0;
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.data3dCache = data;
+              this.isComputing3d = false;
+            }, 500); // Show 100% for half a second
+          });
+        } else if (type === 'error') {
+          console.error('Worker error:', error);
+          this.isComputing3d = false;
+        }
+      };
+      
+      this.worker.onerror = (error) => {
+        console.error('Worker error:', error);
+        this.isComputing3d = false;
+      };
+    },
+
+    compute3DData() {
+      if (this.isComputing3d) return;
+      
+      this.isComputing3d = true;
+      this.computeProgress = 0;
+      this.data3dCache = null;
+      
+      if (!this.worker) {
+        this.initWorker();
+      }
+      
+      this.worker.postMessage({
+        spectrum: this.spectrum,
+        refFreq: this.refFreq,
+        maxInterval: this.maxInterval,
+        stepSize3d: this.stepSize3d
+      });
     }
   },
 
@@ -44,7 +101,18 @@ let app = new Vue({
     },
 
     data3d() {
-      return getData3d(this.spectrum, this.refFreq, this.maxInterval, this.stepSize3d);
+      // Use cached data if available, otherwise trigger computation
+      if (this.data3dCache) {
+        return this.data3dCache;
+      } else if (!this.isComputing3d) {
+        // Trigger computation in background
+        this.$nextTick(() => {
+          this.compute3DData();
+        });
+      }
+      
+      // Return empty data while computing
+      return [[], [], []];
     },
 
     peaks3d() {
@@ -55,6 +123,35 @@ let app = new Vue({
 
     consonantTriads() {
       return getTriads(this.peaks3d);
+    }
+  },
+
+  mounted() {
+    this.initWorker();
+  },
+
+  beforeDestroy() {
+    if (this.worker) {
+      this.worker.terminate();
+    }
+  },
+
+  watch: {
+    // Invalidate 3D cache when parameters change
+    spectrum: {
+      handler() {
+        this.data3dCache = null;
+      },
+      deep: true
+    },
+    refFreq() {
+      this.data3dCache = null;
+    },
+    maxInterval() {
+      this.data3dCache = null;
+    },
+    stepSize3d() {
+      this.data3dCache = null;
     }
   }
 

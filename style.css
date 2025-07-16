@@ -145,3 +145,59 @@ ul li {
   margin-bottom:5px;
   overflow:auto;
 }
+
+/* Fullscreen functionality styles */
+.graph-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  padding: 4px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+  color: #666;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-btn svg {
+  display: block;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.2);
+  opacity: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fullscreen-btn:active {
+  transform: translateY(1px);
+}
+
+/* Fullscreen mode adjustments */
+.graph-container:fullscreen {
+  background: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.graph-container:fullscreen .graph2d,
+.graph-container:fullscreen .graph3d {
+  width: 90vw !important;
+  height: 90vh !important;
+}

@@ -10,7 +10,7 @@ let app = new Vue({
     refFreq: 261.6256,
     maxInterval: 2.05,
 
-    stepSize2d: 0.001,
+    stepSize2d: 0.0001,
     curvatureCutoff2d: 0.1,
 
     stepSize3d: 0.005,

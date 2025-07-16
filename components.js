@@ -89,9 +89,89 @@ Vue.component('triad-table', {
 Vue.component('graph-intervals', {
   props: ['data', 'intervals'],
 
-  template: '<div ref="graph2d" class="graph2d"></div>',
+  template: `
+    <div class="graph-container">
+      <div ref="graph2d" class="graph2d"></div>
+      <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+        <svg v-if="!isFullscreen" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+        <svg v-else width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
+        </svg>
+      </button>
+    </div>
+  `,
+
+  data() {
+    return {
+      isFullscreen: false
+    };
+  },
 
   methods: {
+    toggleFullscreen() {
+      if (!this.isFullscreen) {
+        this.enterFullscreen();
+      } else {
+        this.exitFullscreen();
+      }
+    },
+
+    enterFullscreen() {
+      const container = this.$el;
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+      this.isFullscreen = true;
+      this.$nextTick(() => {
+        Plotly.Plots.resize(this.$refs.graph2d);
+      });
+    },
+
+    exitFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+      this.isFullscreen = false;
+      this.$nextTick(() => {
+        Plotly.Plots.resize(this.$refs.graph2d);
+      });
+    },
+
+    handleFullscreenChange() {
+      const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                             document.mozFullScreenElement || document.msFullscreenElement);
+      if (!isFullscreen && this.isFullscreen) {
+        this.isFullscreen = false;
+        this.$nextTick(() => {
+          Plotly.Plots.resize(this.$refs.graph2d);
+        });
+      }
+    },
+
+    handleResize() {
+      // Debounce resize events
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        if (this.$refs.graph2d) {
+          Plotly.Plots.resize(this.$refs.graph2d);
+        }
+      }, 100);
+    },
+
     make2DGraph: function () {
 
       let component = this;
@@ -100,19 +180,26 @@ Vue.component('graph-intervals', {
         [component.trace1, component.trace2],
 
         {
-
-          margin: { t: 0 },
+          margin: { t: 0, r: 20, l: 45 },
           xaxis: {
             title: {
-              text: 'interval (frequency ratio)'
+              text: 'Interval (frequency ratio)'
             },
           },
           yaxis: {
             title: {
               text: 'Normalized Spectral Dissonance'
             }
+          },
+          legend: {
+            x: 1,
+            y: 1,
+            xanchor: 'right',
+            yanchor: 'top',
+            bgcolor: 'rgba(255,255,255,0.8)',
+            bordercolor: 'rgba(0,0,0,0.1)',
+            borderwidth: 1
           }
-
         }
       );
 
@@ -128,6 +215,24 @@ Vue.component('graph-intervals', {
 
   mounted() {
     this.make2DGraph();
+    
+    // Listen for fullscreen change events
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange);
+    
+    // Listen for window resize events
+    window.addEventListener('resize', this.handleResize);
+  },
+
+  beforeDestroy() {
+    // Clean up event listeners
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange);
+    window.removeEventListener('resize', this.handleResize);
   },
 
   watch: {
@@ -147,7 +252,8 @@ Vue.component('graph-intervals', {
       return {
           x: this.data[0],
           y: this.data[1],
-          name: 'dissonance'
+          name: 'dissonance',
+          line: { width: 1.5, shape: 'spline', smoothing: 1.3 }
         };
     },
 
@@ -157,7 +263,7 @@ Vue.component('graph-intervals', {
         y: this.intervals.map(e => e.y),
         name: 'minima',
         mode: 'markers',
-        marker: { size: 12, opacity: 0.5 }
+        marker: { size: 6, opacity: 0.5 }
       };
     }
   }
@@ -169,23 +275,143 @@ Vue.component('graph-triads', {
 
   template: `
 <div>
-<div ref="graph3dhills" class="graph3d"></div>
+<div class="graph-container">
+  <div ref="graph3dhills" class="graph3d"></div>
+  <button class="fullscreen-btn" @click="toggleFullscreen('hills')" :title="isFullscreenHills ? 'Exit Fullscreen' : 'Fullscreen'">
+    <svg v-if="!isFullscreenHills" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+    </svg>
+    <svg v-else width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
+    </svg>
+  </button>
+</div>
 <slot></slot>
-<div ref="graph3dheatmap" class="graph3d"></div>
+<div class="graph-container">
+  <div ref="graph3dheatmap" class="graph3d"></div>
+  <button class="fullscreen-btn" @click="toggleFullscreen('heatmap')" :title="isFullscreenHeatmap ? 'Exit Fullscreen' : 'Fullscreen'">
+    <svg v-if="!isFullscreenHeatmap" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+    </svg>
+    <svg v-else width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
+    </svg>
+  </button>
+</div>
 </div>
 `,
 
+  data() {
+    return {
+      isFullscreenHills: false,
+      isFullscreenHeatmap: false
+    };
+  },
+
   methods: {
+    toggleFullscreen(type) {
+      if (type === 'hills') {
+        if (!this.isFullscreenHills) {
+          this.enterFullscreen('hills');
+        } else {
+          this.exitFullscreen();
+        }
+      } else if (type === 'heatmap') {
+        if (!this.isFullscreenHeatmap) {
+          this.enterFullscreen('heatmap');
+        } else {
+          this.exitFullscreen();
+        }
+      }
+    },
+
+    enterFullscreen(type) {
+      const container = type === 'hills' ? this.$refs.graph3dhills.parentElement : this.$refs.graph3dheatmap.parentElement;
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+      
+      if (type === 'hills') {
+        this.isFullscreenHills = true;
+      } else {
+        this.isFullscreenHeatmap = true;
+      }
+      
+      this.$nextTick(() => {
+        const graphRef = type === 'hills' ? this.$refs.graph3dhills : this.$refs.graph3dheatmap;
+        Plotly.Plots.resize(graphRef);
+      });
+    },
+
+    exitFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+      
+      this.isFullscreenHills = false;
+      this.isFullscreenHeatmap = false;
+      
+      this.$nextTick(() => {
+        Plotly.Plots.resize(this.$refs.graph3dhills);
+        Plotly.Plots.resize(this.$refs.graph3dheatmap);
+      });
+    },
+
+    handleFullscreenChange() {
+      const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                             document.mozFullScreenElement || document.msFullscreenElement);
+      if (!isFullscreen && (this.isFullscreenHills || this.isFullscreenHeatmap)) {
+        this.isFullscreenHills = false;
+        this.isFullscreenHeatmap = false;
+        this.$nextTick(() => {
+          Plotly.Plots.resize(this.$refs.graph3dhills);
+          Plotly.Plots.resize(this.$refs.graph3dheatmap);
+        });
+      }
+    },
+
+    handleResize() {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        if (this.$refs.graph3dhills) {
+          Plotly.Plots.resize(this.$refs.graph3dhills);
+        }
+        if (this.$refs.graph3dheatmap) {
+          Plotly.Plots.resize(this.$refs.graph3dheatmap);
+        }
+      }, 100);
+    },
+
     make3DGraph: function () {
 
       let component = this;
 
       Plotly.newPlot(component.$refs.graph3dheatmap,
-         [component.trace1, component.trace2]
+         [component.trace1, component.trace2],
+         {
+           margin: { t: 0, r: 20, l: 20, b: 40 },
+           showlegend: false
+         }
       );
 
       Plotly.newPlot(component.$refs.graph3dhills,
-        [component.trace3, component.trace4]
+        [component.trace3, component.trace4],
+        {
+          margin: { t: 0, r: 20, l: 20, b: 40 },
+          showlegend: false
+        }
       );
 
       component.$refs.graph3dheatmap.on('plotly_click', function(data) {
@@ -209,6 +435,24 @@ Vue.component('graph-triads', {
 
   mounted() {
     this.make3DGraph();
+    
+    // Listen for fullscreen change events
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange);
+    
+    // Listen for window resize events
+    window.addEventListener('resize', this.handleResize);
+  },
+
+  beforeDestroy() {
+    // Clean up event listeners
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange);
+    window.removeEventListener('resize', this.handleResize);
   },
 
   watch: {

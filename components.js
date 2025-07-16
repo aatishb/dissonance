@@ -484,7 +484,7 @@ Vue.component('graph-triads', {
         y: this.triads.map(e => e.y),
         name: 'minima',
         mode: 'markers',
-        marker: { size: 12, opacity: 0.5 }
+        marker: { size: 8, opacity: 0.5 }
       };
     },
 

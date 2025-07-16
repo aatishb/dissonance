@@ -13,7 +13,7 @@ let app = new Vue({
     stepSize2d: 0.01,
     curvatureCutoff2d: 0.1,
 
-    stepSize3d: 0.002,
+    stepSize3d: 0.0025,
     dissonanceCutoff3d: 0.4,
     curvatureCutoff3d: 0.1,
     smoothing: 1.5,

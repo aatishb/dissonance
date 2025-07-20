@@ -111,7 +111,7 @@ class mySynth {
   fadeOut(time, fadeOutTime) {
     let i = 0;
     for (let o of this.oscs) {
-      o.fadeOut(Math.max(time, time + fadeOutTime - 6.91*0.05 * i) );
+      o.fadeOut(Math.max(time, time + fadeOutTime - 6.91*0.05 * Math.min(i,9)) );
       o.stop(time + fadeOutTime)
       i++;
     }
